@@ -20,14 +20,19 @@
         $('.selectpicker').selectpicker();
     });
 
-    function showEmployeeData() {
-        var employeeId = $("#nameId").val();
-        if (employeeId != 0) {
+    function checkSalaryIsExsit() {
+        var name = $("#name").val();
+        var empNo = $("#empNo").val();
+        if (name.trim().length>0 && empNo.trim().length>0) {
+            alert(name+" "+empNo)
+            var formData = new FormData();
+            formData.append('name', name);
+            formData.append('empNo', empNo);
             $.ajax({
                 data: employeeId,
                 type: "POST",
                 contentType: "application/json",//上传内容格式为json结构
-                url: "/person/getemployeebyId",
+                url: "/finance/getSalarybyId",
                 success: function (msg) {
                     var data = eval(msg);//将msg化为数;
                     $("#employeeNo").val(data[0].empNo);
@@ -41,6 +46,7 @@
                     $("#meritSalary").val(data[0].meritSalary)
                     $("#posSalary").val(data[0].posSalary)
                     $("#remark").val(data[0].remark)
+                    $('#state').selectpicker('val', data[0].state);
                      computeAllSalary();
                     $("#errormessage").hide();
                 },
@@ -148,21 +154,17 @@
         }
     }
 
-    function addSalaryToMysql() {
-        var employeeNo = $("#employeeNo").val();
-        var remark = $("#remark").val();
-        var allSalary = $("#allSalary").val();
-        if (employeeNo.trim().length > 0 && allSalary.trim().length >0) {
-            // window.location.href = "/finance/addSalaryToMysql?empNo=" + employeeNo
-            //     + "&compreSalary=" + $("#compreSalary").val() + "&endLeaveStr=" + endLeaveStr + "&leaveLong=" + leaveLong + "&leaveDescrip=" + leaveDescrip
-            //     + "&remark=" + remark+"&type="+typeValue;
-            document.forms["addEmployee"].submit();
-        } else {
+    function updateSalaryToMysql() {
+        $("#errormessageempNo").hide();
+        var allSalary =  $("#allSalary").val();
+       if(allSalary.trim().length ==0 || allSalary.trim() ==0) {
             $("#errormessage").show();
             var errormessagediv = document.getElementById("errormessage");
-            errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;请填写相关信息再提交!";
-            errormessagediv.style.color = "red";
+            errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;员工工资合计不能为空!";
+            errormessagediv.style.color = "red"
+            return;
         }
+            document.forms["updateEmployee"].submit();
     }
 
 
@@ -181,6 +183,54 @@
         m = m < 10 ? "0" + m : m;
         d = d < 10 ? "0" + d : d;
         return h + "-" + m + "-" + d;
+    }
+
+    function checksalaryemployno(valuestr) {
+        $("#errormessageempNo").hide();
+        $("#rightmessageempNo").hide();
+        var empoyeeNo = valuestr.trim();
+        var reg = new RegExp(/^CS20[0-2]{1}[0-9]{1}[0-1]{1}[0-9]{1}[0-3]{1}[0-9]{1}[0-9]{2}$/g);
+        if (empoyeeNo.length > 0) {
+            if (reg.test(empoyeeNo)) {
+                $.ajax({
+                    data: empoyeeNo,
+                    type: "POST",
+                    contentType: "application/json",//上传内容格式为json结构
+                    url: "/finance/checkEmployNoIsExsit",
+                    success: function (msg) {
+                        var amsg = eval(msg)
+                        if (amsg > 0) {
+                            $("#empNo").val("");
+                            $("#errormessageempNo").show();
+                            $("#errormessageempNo").html("<img src=\"../static/images/icon/error.jpg\"\n" +
+                                "                                         style=\"width: 20px; height: 20px; vertical-align: middle\" border=\"0\"\n" +
+                                "                                         align=\"center\"><strong><font size=\"2\" color=\"red\">工号已存在</font></strong>\n" +
+                                "                                ");
+                            $("#rightmessageempNo").hide();
+                        } else {
+                            $("#errormessageempNo").hide();
+                            $("#rightmessageempNo").show();
+                        }
+                    },
+                    error: function (msg) {
+                        $("#errormessage").show();
+                        var errormessagediv = document.getElementById("errormessage");
+                        errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;系统发生错误!";
+                        errormessagediv.style.color = "red";
+                    }
+
+                });
+            } else {
+                $("#employeeNo").val("");
+                $("#errormessageempNo").html("<img src=\"../static/images/icon/error.jpg\"\n" +
+                    "                                         style=\"width: 20px; height: 20px; vertical-align: middle\" border=\"0\"\n" +
+                    "                                         align=\"center\"><strong><font size=\"2\" color=\"red\">工号不合法</font></strong>\n" +
+                    "                                ");
+                $("#errormessageempNo").show();
+                $("#rightmessageempNo").hide();
+            }
+        }
+
     }
 
     function computeAllSalary() {
@@ -215,39 +265,44 @@
         </div>
         <div class="panel-body form-inline">
             <div id="innerdiv">
-                <form id="addEmployee" th:action="@{/finance/addsalary}" th:method="post" th:object="${employee}">
-                    <input type="hidden" th:field="*{empNo}" id="empnono">
+                <form id="updateEmployee" th:action="@{/finance/updatesalary}" th:method="post" th:object="${salary}">
                     <table class="table table-hover table-striped text-center" style="text-align: right;width: auto;border-spacing:0px 3px;">
                         <tr>
                             <td><label>姓名：</label></td>
                             <td>
-                                <input type="text" class="form-control" th:field="*{name}"
-                                       disabled="">
+                                <input type="text" class="form-control"  id="name"
+                                       th:field="*{name}" readonly>
+
                             </td>
                         </tr>
 
                         <tr>
                             <td><label>工号：</label></td>
-                            <td><input type="text" class="form-control"  id="employeeNo"
-                                       disabled="" th:field="*{empNo}">
+                            <td><input type="text" class="form-control"  id="empNo"
+                                       th:field="*{empNo}" readonly
+                                       onblur="checksalaryemployno(this.value)">
+                            </td>
+                            <td style="text-align: left">
+                                <div style="display: none;" id="errormessageempNo">
+                                    <img src="../static/images/icon/error.jpg"
+                                          style="width: 20px; height: 20px; vertical-align: middle" border="0"
+                                         align="center"><strong><font size="2"
+                                                                      color="red">工号不合法</font></strong>
+                                </div>
+                                <div style="display: none;" id="rightmessageempNo">
+                                    <img src="../static/images/icon/right.jpg"
+                                         style="width: 20px; height: 20px; vertical-align: middle" border="0"
+                                         align="center">
+                                </div>
                             </td>
                         </tr>
                         <tr>
-                            <td><label>职位：</label></td>
+                            <td><label><font color="#FF0000" size="2">*</font>&nbsp;入职日期：</label></td>
                             <td>
-                                <input type="text" class="form-control" th:field="*{positionName}" id="positionId"
-                                       disabled="">
+                                <input type="text" style="width:170px;height: 34px;text-align: center" id="inComDate"
+                                       disabled="" class="Wdate" th:field="*{inComDate}"
+                                       onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})"/>
                             </td>
-                            <td>&nbsp;&nbsp;&nbsp; <a href="/person/topositanddeptpage?">没有？新增职位</a></td>
-                        </tr>
-                        <tr>
-                            <td><label>部门：</label></td>
-                            <td>
-                                <input type="text" class="form-control" th:field="*{deptName}" id="deptId"
-                                       disabled="">
-
-                            </td>
-                            <td> &nbsp;&nbsp;&nbsp;<a href="/person/topositanddeptpage?flaga=66">没有？新增部门</a></td>
 
                         </tr>
                         <tr>
@@ -283,20 +338,6 @@
                             </td>
                         </tr>
                         <tr>
-                            <td><label>审核状态：</label></td>
-                            <td style="width:200px">
-                                <select id="state"  class="selectpicker show-tick form-control"
-                                        data-live-search="true" data-actions-box="true"
-                                        data-selected-text-format="count > 2" th:field="*{state}">
-                                    　　
-                                    <option  th:selected="${employee.state eq 0}" th:value="0">未审核</option>
-                                    <option  th:selected="${employee.state eq 0}" th:value="1">审核通过</option>
-                                    <option  th:selected="${employee.state eq 0}" th:value="2">审核未通过</option>
-
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
                             <td><label>工资合计(元)：</label></td>
                             <td style="width:200px">
                                 <input type="text" class="form-controlspan12 form-control"
@@ -313,7 +354,8 @@
                         <tr>
                             <td colspan="2" style="text-align: center;">
                                 <input type="button" value="返回" class="btn btn-primary" onclick="javascript:history.back(-1);">
-                                <input type="button" value="添加" class="btn btn-primary" onclick="addSalaryToMysql()">
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="button" value="修改" class="btn btn-primary" onclick="updateSalaryToMysql()">
 
                             </td>
                             <td>

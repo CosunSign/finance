@@ -15,7 +15,9 @@ public interface IFinanceServ {
 
     void saveAllSalaryData(List<Salary> salaryList) throws Exception;
 
-    void addSalaryByBean(Employee employee) throws Exception;
+    List<HistorySalary> getHistorySalaryRecordByNameAndEmpNo(Salary salary) throws Exception;
+
+    void addSalaryByBean(Salary salary) throws Exception;
 
     void deleteEmpSalaryByBatch(Employee employee) throws Exception;
 
@@ -63,11 +65,22 @@ public interface IFinanceServ {
 
     int checkEmpNoandYearMonthIsExsit(EmpHours empHours) throws Exception;
 
+    int checkFIEmpNoandYearMonthIsExsit(EmpHours empHours) throws Exception;
+
+
     int checkFinanceImportNoandYearMonthIsExsit(EmpHours empHours) throws Exception;
 
     List<EmpHours> queryEmployeeHoursByCondition(Employee employee) throws Exception;
 
+    Salary getEmployeeBySalaryId(Integer salaryId) throws Exception;
+
+    int checkEmployNoAndNameIsExsit(String empNo,String name) throws Exception;
+
+    Salary getEmployeeBySalaryId2(Integer salaryId) throws Exception;
+
     int queryEmployeeHoursByConditionCount(Employee employee) throws Exception;
+
+    List<EmpHours> getEmpHoursByNameAndYearMonth(String name,String yearMonth) throws Exception;
 
     void deleteEmployeeHoursByEmpno(Integer id) throws Exception;
 
@@ -81,15 +94,27 @@ public interface IFinanceServ {
 
     List<Dept> findAllDeptAll() throws Exception;
 
+    List<Dept> findAllDeptAll2() throws Exception;
+
+    void updateSalaryByBean(Salary salary) throws Exception;
+
+//    List<Salary> getSalarybyId() throws Exception;
+
+    int checkEmployNoIsExsit(String empNo) throws Exception;
+
     List<Employee> findAllEmployeeAll() throws Exception;
+
+    Salary getSalaryByEmpNo(String empNo,String name) throws Exception;
 
     List<Employee> findAllEmployeeFinance(Employee employee) throws Exception;
 
+    List<Salary> findAllEmployeeFinanceA(Employee employee) throws Exception;
+
     int findAllEmployeeCount() throws Exception;
 
-    void deleteEmployeeSalaryByEmpno(String empNo) throws Exception;
+    void deleteEmployeeSalaryByEmpno(Integer id) throws Exception;
 
-    List<Employee> queryEmployeeSalaryByCondition(Employee employee) throws Exception;
+    List<Salary> queryEmployeeSalaryByCondition(Employee employee) throws Exception;
 
     int queryEmployeeSalaryByConditionCount(Employee employee) throws Exception;
 }

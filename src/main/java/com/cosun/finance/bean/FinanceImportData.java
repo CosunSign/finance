@@ -33,6 +33,8 @@ public class FinanceImportData implements Serializable {
     private Double basicWorkHours;//基本工时
     private String remark;
 
+    private Integer salaryId;
+
     // 分页属性
     private int currentPage = 1;// 用于接收页面传过来的当前页数
     private int maxPage;// 最大页数
@@ -43,6 +45,14 @@ public class FinanceImportData implements Serializable {
     private List<Integer> ids;
     private Integer type;
 
+
+    public Integer getSalaryId() {
+        return salaryId;
+    }
+
+    public void setSalaryId(Integer salaryId) {
+        this.salaryId = salaryId;
+    }
 
     public Double getBasicWorkHours() {
         return basicWorkHours;

@@ -137,15 +137,15 @@
         var currentpage = $("#n_currentPage").val();
         window.parent.document.getElementById('coverbehidepage').style.display = "block";
         var formData = new FormData();
-        formData.append('nameIds', $("#name").val());
+        formData.append('names', $("#name").val());
         formData.append('empNo', $("#empNo").val());
-        formData.append('deptIds', $("#deptId").val());
-        formData.append('positionIds', $("#positionId").val());
+        formData.append('deptNames', $("#deptId").val());
+        formData.append('bigDeptNames', $("#bigDeptName").val());
         formData.append('startIncomDateStr', $("#startIncomDateStr").val());
         formData.append('endIncomDateStr', $("#endIncomDateStr").val());
         formData.append('sortMethod', sortMethod);
         formData.append('sortByName', sortByName);
-        formData.append('workTypes', $("#workType").val());
+        formData.append('yearMonth', $("#yearmonth").val());
         formData.append('currentPage', currentpage);
         $.ajax({
             data: formData,
@@ -196,9 +196,8 @@
                         tr = $("<tr id='" + data[num].id + "'></tr>");
                         tr.append("<td>" + ((num + 1) + ((n_currentPage.val() - 1) * pageSize)) + "</td>");
                         tr.append("<td>" + isNull(data[num].yearMonth) + "</td>");
+                        tr.append("<td>" + isNull(data[num].bigDeptName) + "</td>");
                         tr.append("<td>" + isNull(data[num].deptName) + "</td>");
-                        tr.append("<td>" + isNull(data[num].positionName) + "</td>");
-                        tr.append("<td>" + isNull(data[num].positionAttrName) + "</td>");
                         tr.append("<td>" + isNull(data[num].empNo) + "</td>");
                         tr.append("<td>" + isNull(data[num].name) + "</td>");
                         tr.append("<td>" + isNull(data[num].inCompDate) + "</td>");
@@ -302,15 +301,15 @@
         var currentpage = $("#n_currentPage").val();
         window.parent.document.getElementById('coverbehidepage').style.display = "block";
         var formData = new FormData();
-        formData.append('nameIds', $("#name").val());
+        formData.append('names', $("#name").val());
         formData.append('empNo', $("#empNo").val());
-        formData.append('deptIds', $("#deptId").val());
-        formData.append('positionIds', $("#positionId").val());
+        formData.append('deptNames', $("#deptId").val());
+        formData.append('bigDeptNames', $("#bigDeptName").val());
         formData.append('startIncomDateStr', $("#startIncomDateStr").val());
         formData.append('endIncomDateStr', $("#endIncomDateStr").val());
         formData.append('sortMethod', sortMethod);
         formData.append('sortByName', sortByName);
-        formData.append('workTypes', $("#workType").val());
+        formData.append('yearMonth', $("#yearmonth").val());
         formData.append('currentPage', 1);
         $.ajax({
             data: formData,
@@ -361,9 +360,8 @@
                         tr = $("<tr id='" + data[num].id + "'></tr>");
                         tr.append("<td>" + ((num + 1) + ((n_currentPage.val() - 1) * pageSize)) + "</td>");
                         tr.append("<td>" + isNull(data[num].yearMonth) + "</td>");
+                        tr.append("<td>" + isNull(data[num].bigDeptName) + "</td>");
                         tr.append("<td>" + isNull(data[num].deptName) + "</td>");
-                        tr.append("<td>" + isNull(data[num].positionName) + "</td>");
-                        tr.append("<td>" + isNull(data[num].positionAttrName) + "</td>");
                         tr.append("<td>" + isNull(data[num].empNo) + "</td>");
                         tr.append("<td>" + isNull(data[num].name) + "</td>");
                         tr.append("<td>" + isNull(data[num].inCompDate) + "</td>");
@@ -528,7 +526,7 @@
                                         data-live-search="true" data-actions-box="true"
                                         data-selected-text-format="count > 2">
                                     　　
-                                    <option th:each="c:${empList}" th:value="${c.id}"
+                                    <option th:each="c:${empList}" th:value="${c.name}"
                                             th:text="${c.name}"></option>
                                 </select>
                             </label>
@@ -540,31 +538,36 @@
                         <td>
                             <label><input type="text" id="empNo" class="form-control" style="width:150px"></label>
                         </td>
+
                         <td style="text-align: right">
-                            <label>部门：</label>
+                            &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <label>大部门：</label>
+                        </td>
+                        <td>
+
+                            <select id="bigDeptName" multiple class="selectpicker show-tick form-control"
+                                    data-live-search="true" data-actions-box="true"
+                                    data-selected-text-format="count > 1">
+                                　　
+                                <option th:each="c:${deptList2}" th:value="${c.bigDeptName}"
+                                        th:text="${c.bigDeptName}"></option>
+                            </select>
+                        </td>
+
+
+                        <td style="text-align: right">
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label>部门:</label>
                         </td>
                         <td>
                             <select id="deptId" multiple class="selectpicker show-tick form-control"
                                     data-live-search="true" data-actions-box="true"
                                     data-selected-text-format="count > 2">
                                 　　
-                                <option th:each="c:${deptList}" th:value="${c.id}"
+                                <option th:each="c:${deptList}" th:value="${c.deptname}"
                                         th:text="${c.deptname}"></option>
                             </select>
                         </td>
 
-                        <td style="text-align: right">
-                            <label>职位：</label>
-                        </td>
-                        <td>
-                            <select id="positionId" multiple class="selectpicker show-tick form-control"
-                                    data-live-search="true" data-actions-box="true"
-                                    data-selected-text-format="count > 1">
-                                　　
-                                <option th:each="c:${positionList}" th:value="${c.id}"
-                                        th:text="${c.positionName}"></option>
-                            </select>
-                        </td>
                     </tr>
                     <tr>
                         <td>
@@ -587,34 +590,19 @@
 
                         </td>
 
-
-                        <td>
-                            <label>&nbsp;&nbsp;工作方式：</label>
+                        <td align="right">
+                            <label>年月选择:&nbsp;&nbsp;</label>
                         </td>
                         <td>
-                            <select id="workType" multiple class="selectpicker show-tick form-control"
-                                    data-live-search="true" data-actions-box="true"
-                                    data-selected-text-format="count > 2">
-                                　　
-                                <option th:value="0">车间</option>
-                                <option th:value="1">办公区</option>
-                            </select>
+                            <input type="text" id="yearmonth"
+                                   style="width:130px;height: 34px;text-align: center"
+                                   class="Wdate" onclick="WdatePicker({dateFmt:'yyyy-MM'})"/>
                         </td>
-
                         <td colspan="2" style="text-align: right">
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                             <a class="btn btn-primary"
                                href="javascript:void(0);" onclick="querySalaryDataOutPutByCondition()">查找</a>
-                            <!--<input type="button" value="查找" class="btn btn-primary">-->
-                            <!--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-->
-                            <!--<a class="btn btn-primary"-->
-                            <!--th:disabled="${userInfo.type ne 1}"-->
-                            <!--href="/finance/toaddfinanceimportdata">新增</a>-->
-                            <!--&nbsp;&nbsp;&nbsp;-->
-                            <!--<a class="btn btn-primary"-->
-                            <!--th:disabled="${userInfo.type ne 1}"-->
-                            <!--href="javascript:void(0);" onclick="deleteFinanceImportDataByBatch()">批量删除</a>-->
-                            <!--<input type="button" value="新增" class="btn btn-primary" onclick="showAddPersonDiv()">-->
+
                         </td>
                         <td>
                             <div style="display: none" id="errormessage">
@@ -636,21 +624,16 @@
                 <i class="fa fa-sort-desc" onclick="sortByDesc('yearMonth')" aria-hidden="true"></i>
             </th>
             <th style="text-align: center">
+                <i class="fa fa-sort-asc" onclick="sortByAsc('bigDeptName')" aria-hidden="true"></i>
+                大部门
+                <i class="fa fa-sort-desc" onclick="sortByDesc('bigDeptName')" aria-hidden="true"></i>
+            </th>
+            <th style="text-align: center">
                 <i class="fa fa-sort-asc" onclick="sortByAsc('deptName')" aria-hidden="true"></i>
                 部门
                 <i class="fa fa-sort-desc" onclick="sortByDesc('deptName')" aria-hidden="true"></i>
             </th>
 
-            <th style="text-align: center">
-                <i class="fa fa-sort-asc" onclick="sortByAsc('positionName')" aria-hidden="true"></i>
-                职务
-                <i class="fa fa-sort-desc" onclick="sortByDesc('positionName')" aria-hidden="true"></i>
-            </th>
-            <th style="text-align: center">
-                <i class="fa fa-sort-asc" onclick="sortByAsc('positionAttrName')" aria-hidden="true"></i>
-                职位
-                <i class="fa fa-sort-desc" onclick="sortByDesc('positionAttrName')" aria-hidden="true"></i>
-            </th>
             <th style="text-align: center">
                 <i class="fa fa-sort-asc" onclick="sortByAsc('empNo')" aria-hidden="true"></i>
                 工号
@@ -873,9 +856,8 @@
                     <td align="center"
                         th:text="${(iterStat.index+1)}+${employee.currentPage-1}*${employee.pageSize}"></td>
                     <td align="center" th:text="${empH.yearMonth}"></td>
+                    <td align="center" th:text="${empH.bigDeptName}"></td>
                     <td align="center" th:text="${empH.deptName}"></td>
-                    <td align="center" th:text="${empH.positionName}"></td>
-                    <td align="center" th:text="${empH.positionAttrName}"></td>
                     <td align="center" th:text="${empH.empNo}"></td>
                     <td align="center" th:text="${empH.name}"></td>
                     <td align="center" th:text="${empH.inCompDate}"></td>
@@ -922,7 +904,7 @@
         </div>
         <div th:if="${#lists.isEmpty(salaryDataOutPutList)}">
             <tr>
-                <td colspan="46">
+                <td colspan="45">
                     查无数据
                 </td>
             </tr>
@@ -932,7 +914,7 @@
         <tfoot id="s_tfoot">
         <tr id="showdiv">
 
-            <td colspan="46" align="center">
+            <td colspan="45" align="center">
                 <span>第</span>
                 <span th:text="${employee.currentPage}" id="currentpagespan"> </span>
                 <span>页|共</span>
@@ -988,7 +970,7 @@
 
 
         <tr style="display:none;" id="nodatadiv">
-            <td colspan="46" align="center">
+            <td colspan="45" align="center">
                 查无数据
             </td>
         </tr>

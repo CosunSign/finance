@@ -9,13 +9,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
@@ -99,7 +97,7 @@ public class FinanceController {
         try {
             ModelAndView view = new ModelAndView("salarycompute");
             List<SalaryDataOutPut> salaryDataOutPuts = financeServ.computeSalaryData(financeImportData.getYearMonth());
-            String outpathname = "计算完成，请下载查看!";
+            String  outpathname = "计算完成，请下载查看!";
             if(salaryDataOutPuts.size()>0) {
                 if (salaryDataOutPuts.get(0).getErrorMessage() == null || salaryDataOutPuts.get(0).getErrorMessage().trim().length() <= 0) {
                     financeServ.saveSalaryDataOutPutsList(salaryDataOutPuts,financeImportData.getYearMonth());
@@ -137,8 +135,26 @@ public class FinanceController {
             }
             view.addObject("flag", outpathname);
             view.addObject("financeImportData",financeImportData );
-            view.addObject("errorMessage", "空文件");
+            view.addObject("errorMessage", "没有数据");
             return view;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/checkEmployNoIsExsit", method = RequestMethod.POST)
+    public void checkEmployNoIsExsit(Salary salary, HttpServletResponse response) throws Exception {
+        try {
+            int isSave = financeServ.checkEmployNoAndNameIsExsit(salary.getEmpNo(),salary.getName());
+            String str1;
+            ObjectMapper x = new ObjectMapper();//ObjectMapper类提供方法将list数据转为json数据
+            str1 = x.writeValueAsString(isSave);
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("text/html;charset=UTF-8");
+            response.getWriter().print(str1); //返回前端ajax
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             e.printStackTrace();
@@ -151,24 +167,40 @@ public class FinanceController {
     public ModelAndView toaddpersonsalarypage(HttpSession session) throws Exception {
         UserInfo userInfo = (UserInfo) session.getAttribute("account");
         ModelAndView view = new ModelAndView("addfinance");
-        Employee employee = new Employee();
         List<Employee> empList = financeServ.findAllEmployeeAll();
-        view.addObject("employee", employee);
+        view.addObject("salary", new Salary());
         view.addObject("empList", empList);
         return view;
     }
 
+//    @ResponseBody
+//    @RequestMapping(value = "/getSalarybyId", method = RequestMethod.POST)
+//    public void getSalarybyId(@RequestBody Integer employeeId, HttpServletResponse response) throws Exception {
+//        try {
+//            List<Salary> employees = financeServ.getSalarybyId(employeeId);
+//            String str1;
+//            ObjectMapper x = new ObjectMapper();//ObjectMapper类提供方法将list数据转为json数据
+//            str1 = x.writeValueAsString(employees);
+//            response.setCharacterEncoding("UTF-8");
+//            response.setContentType("text/html;charset=UTF-8");
+//            response.getWriter().print(str1); //返回前端ajax
+//        } catch (Exception e) {
+//            logger.error(e.getMessage(), e);
+//            e.printStackTrace();
+//            throw e;
+//        }
+//    }
 
     @ResponseBody
     @RequestMapping(value = "/checkFinanceImportNoandYearMonthIsExsit", method = RequestMethod.POST)
     public void checkFinanceImportNoandYearMonthIsExsit(EmpHours empHours, HttpServletResponse response, HttpSession session) throws Exception {
         try {
-            List<Employee> employees = new ArrayList<Employee>();
+            List<Salary> employees = new ArrayList<Salary>();
             UserInfo userInfo = (UserInfo) session.getAttribute("account");
-            Employee employee = new Employee();
-            int isExsit = financeServ.checkFinanceImportNoandYearMonthIsExsit(empHours);
+            Salary employee = new Salary();
+            int isExsit = financeServ.checkFIEmpNoandYearMonthIsExsit(empHours);
             if (isExsit == 0) {
-                //employee = personServ.getEmployeeByEmpno(empHours.getEmpNo());
+                employee = financeServ.getEmployeeBySalaryId2(empHours.getSalaryId());
             }
             employee.setType(isExsit);
             employees.add(employee);
@@ -186,15 +218,15 @@ public class FinanceController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/checkEmpNoandYearMonthIsExsit", method = RequestMethod.POST)
-    public void checkEmpNoandYearMonthIsExsit(EmpHours empHours, HttpServletResponse response, HttpSession session) throws Exception {
+    @RequestMapping(value = "/checkEmpNoandNameandYearMonthIsExsit", method = RequestMethod.POST)
+    public void checkEmpNoandNameandYearMonthIsExsit(EmpHours empHours, HttpServletResponse response, HttpSession session) throws Exception {
         try {
-            List<Employee> employees = new ArrayList<Employee>();
+            List<Salary> employees = new ArrayList<Salary>();
             UserInfo userInfo = (UserInfo) session.getAttribute("account");
-            Employee employee = new Employee();
+            Salary employee = new Salary();
             int isExsit = financeServ.checkEmpNoandYearMonthIsExsit(empHours);
             if (isExsit == 0) {
-               // employee = personServ.getEmployeeByEmpno(empHours.getEmpNo());
+                employee = financeServ.getEmployeeBySalaryId(empHours.getSalaryId());
             }
             employee.setType(isExsit);
             employees.add(employee);
@@ -216,20 +248,19 @@ public class FinanceController {
     public ModelAndView toaddpersonsalarypageappli(HttpSession session) throws Exception {
         UserInfo userInfo = (UserInfo) session.getAttribute("account");
         ModelAndView view = new ModelAndView("addfinanceappli");
-        Employee employee = new Employee();
         List<Employee> empList = financeServ.findAllEmployeeAll();
-        view.addObject("employee", employee);
+        view.addObject("salary", new Salary());
         view.addObject("empList", empList);
         return view;
     }
 
     @ResponseBody
     @RequestMapping(value = "/toupdateEmployeeSalaryByempNo", method = RequestMethod.GET)
-    public ModelAndView toupdateEmployeeSalaryByempNo(String empNo, HttpSession session) throws Exception {
+    public ModelAndView toupdateEmployeeSalaryByempNo(String empNo,String name, HttpSession session) throws Exception {
         UserInfo userInfo = (UserInfo) session.getAttribute("account");
         ModelAndView view = new ModelAndView("updatefinance");
-        //Employee employee = financeServ.getEmployeeByEmpno(empNo);
-       // view.addObject("employee", employee);
+        Salary salary = financeServ.getSalaryByEmpNo(empNo,name);
+        view.addObject("salary", salary);
         return view;
     }
 
@@ -406,8 +437,9 @@ public class FinanceController {
         ModelAndView view = new ModelAndView("finance");
         UserInfo userInfo = (UserInfo) session.getAttribute("account");
         List<Dept> deptList = financeServ.findAllDeptAll();
+        List<Dept> deptList2 = financeServ.findAllDeptAll2();
         List<Employee> empList = financeServ.findAllEmployeeAll();
-        List<Employee> employeeList = financeServ.findAllEmployeeFinance(new Employee());
+        List<Salary> employeeList = financeServ.findAllEmployeeFinanceA(employee);
         int recordCount = financeServ.findAllEmployeeCount();
         int maxPage = recordCount % employee.getPageSize() == 0 ? recordCount / employee.getPageSize() : recordCount / employee.getPageSize() + 1;
         employee.setMaxPage(maxPage);
@@ -416,6 +448,7 @@ public class FinanceController {
         view.addObject("empList", empList);
         view.addObject("employee", employee);
         view.addObject("deptList", deptList);
+        view.addObject("deptList2", deptList2);
         view.addObject("userInfo", userInfo);
         view.addObject("flag", 2);
         return view;
@@ -425,8 +458,9 @@ public class FinanceController {
 @RequestMapping(value = "/deleteFinanceImportDataByBatch", method = RequestMethod.GET)
 public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSession session) throws Exception {
     financeServ.deleteFinanceImportDataByBatch(employee);
-    ModelAndView view = new ModelAndView("emphours");
+    ModelAndView view = new ModelAndView("financeimportdata");
     UserInfo userInfo = (UserInfo) session.getAttribute("account");
+    List<Dept> deptList2 = financeServ.findAllDeptAll2();
     List<Dept> deptList = financeServ.findAllDeptAll();
     List<Employee> empList = financeServ.findAllEmployeeAll();
     List<FinanceImportData> financeImportDataList = financeServ.findAllFinanceImportData(employee);
@@ -438,6 +472,7 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
     view.addObject("empList", empList);
     view.addObject("employee", employee);
     view.addObject("deptList", deptList);
+    view.addObject("deptList2", deptList2);
     view.addObject("userInfo", userInfo);
     view.addObject("flag", 2);
     return view;
@@ -490,21 +525,66 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
 
     @ResponseBody
     @RequestMapping(value = "/addsalary", method = RequestMethod.POST)
-    public ModelAndView addsalary(Employee employee, HttpSession session) throws Exception {
+    public ModelAndView addsalary(Salary salary, HttpSession session) throws Exception {
         ModelAndView view = new ModelAndView("finance");
-        financeServ.addSalaryByBean(employee);
+        Employee em = new Employee();
+        financeServ.addSalaryByBean(salary);
         UserInfo userInfo = (UserInfo) session.getAttribute("account");
         List<Dept> deptList = financeServ.findAllDeptAll();
+        List<Dept> deptList2 = financeServ.findAllDeptAll2();
         List<Employee> empList = financeServ.findAllEmployeeAll();
-        List<Employee> employeeList = financeServ.findAllEmployeeFinance(new Employee());
+        List<Salary> employeeList = financeServ.findAllEmployeeFinanceA(em);
         int recordCount = financeServ.findAllEmployeeCount();
-        int maxPage = recordCount % employee.getPageSize() == 0 ? recordCount / employee.getPageSize() : recordCount / employee.getPageSize() + 1;
-        employee.setMaxPage(maxPage);
-        employee.setRecordCount(recordCount);
+        int maxPage = recordCount % em.getPageSize() == 0 ? recordCount / em.getPageSize() : recordCount / em.getPageSize() + 1;
+        em.setMaxPage(maxPage);
+        em.setRecordCount(recordCount);
         view.addObject("employeeList", employeeList);
         view.addObject("empList", empList);
-        view.addObject("employee", employee);
+        view.addObject("employee", em);
         view.addObject("deptList", deptList);
+        view.addObject("deptList2", deptList2);
+        view.addObject("userInfo", userInfo);
+        return view;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/showhistorysalaryrecord")
+    public void showhistorysalaryrecord(@RequestBody(required = true) Salary salary, HttpServletRequest request, HttpSession session, HttpServletResponse response) throws Exception {
+        UserInfo userInfo = (UserInfo) session.getAttribute("account");
+        List<HistorySalary> records = financeServ.getHistorySalaryRecordByNameAndEmpNo(salary);
+        String str = null;
+        ObjectMapper x = new ObjectMapper();//ObjectMapper类提供方法将list数据转为json数据
+        try {
+            str = x.writeValueAsString(records);
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("text/html;charset=UTF-8");
+            response.getWriter().print(str); //返回前端ajax
+        } catch (IOException e) {
+            logger.debug(e.getMessage());
+            throw e;
+        }
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/updatesalary", method = RequestMethod.POST)
+    public ModelAndView updatesalary(Salary salary, HttpSession session) throws Exception {
+        ModelAndView view = new ModelAndView("finance");
+        Employee em = new Employee();
+        financeServ.updateSalaryByBean(salary);
+        UserInfo userInfo = (UserInfo) session.getAttribute("account");
+        List<Dept> deptList = financeServ.findAllDeptAll();
+        List<Dept> deptList2 = financeServ.findAllDeptAll2();
+        List<Employee> empList = financeServ.findAllEmployeeAll();
+        List<Salary> employeeList = financeServ.findAllEmployeeFinanceA(em);
+        int recordCount = financeServ.findAllEmployeeCount();
+        int maxPage = recordCount % em.getPageSize() == 0 ? recordCount / em.getPageSize() : recordCount / em.getPageSize() + 1;
+        em.setMaxPage(maxPage);
+        em.setRecordCount(recordCount);
+        view.addObject("employeeList", employeeList);
+        view.addObject("empList", empList);
+        view.addObject("employee", em);
+        view.addObject("deptList", deptList);
+        view.addObject("deptList2", deptList2);
         view.addObject("userInfo", userInfo);
         return view;
     }
@@ -514,7 +594,7 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
     public ModelAndView addsalaryappli(Employee employee, HttpSession session) throws Exception {
         ModelAndView view = new ModelAndView("financeappli");
         employee.setState(0);
-        financeServ.addSalaryByBean(employee);
+        //financeServ.addSalaryByBean(employee);
         UserInfo userInfo = (UserInfo) session.getAttribute("account");
         List<Dept> deptList = financeServ.findAllDeptAll();
         List<Employee> empList = financeServ.findAllEmployeeAll();
@@ -562,15 +642,16 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
 
     @ResponseBody
     @RequestMapping(value = "/deleteEmployeeSalaryByEmpNo", method = RequestMethod.GET)
-    public ModelAndView deleteEmployeeSalaryByEmpNo(String empNo, HttpSession session) throws Exception {
+    public ModelAndView deleteEmployeeSalaryByEmpNo(Integer id, HttpSession session) throws Exception {
         try {
             UserInfo userInfo = (UserInfo) session.getAttribute("account");
             ModelAndView view = new ModelAndView("finance");
-            financeServ.deleteEmployeeSalaryByEmpno(empNo);
+            financeServ.deleteEmployeeSalaryByEmpno(id);
             Employee employee = new Employee();
             List<Employee> empList = financeServ.findAllEmployeeAll();
             List<Dept> deptList = financeServ.findAllDeptAll();
-            List<Employee> employeeList = financeServ.findAllEmployeeFinance(employee);
+            List<Dept> deptList2 = financeServ.findAllDeptAll2();
+            List<Salary> employeeList = financeServ.findAllEmployeeFinanceA(employee);
             int recordCount = financeServ.findAllEmployeeCount();
             int maxPage = recordCount % employee.getPageSize() == 0 ? recordCount / employee.getPageSize() : recordCount / employee.getPageSize() + 1;
             employee.setMaxPage(maxPage);
@@ -579,6 +660,7 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
             view.addObject("empList", empList);
             view.addObject("employee", employee);
             view.addObject("deptList", deptList);
+            view.addObject("deptList2", deptList2);
             view.addObject("flag", 2);
             view.addObject("userInfo", userInfo);
             return view;
@@ -623,14 +705,13 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
     public void queryEmployeeSalaryByCondition(Employee employee, HttpServletResponse response, HttpSession session) throws Exception {
         try {
             UserInfo userInfo = (UserInfo) session.getAttribute("account");
-            List<Employee> employeeList = financeServ.queryEmployeeSalaryByCondition(employee);
+            List<Salary> employeeList = financeServ.queryEmployeeSalaryByCondition(employee);
             int recordCount = financeServ.queryEmployeeSalaryByConditionCount(employee);
             int maxPage = recordCount % employee.getPageSize() == 0 ? recordCount / employee.getPageSize() : recordCount / employee.getPageSize() + 1;
             if (employeeList.size() > 0) {
                 employeeList.get(0).setMaxPage(maxPage);
                 employeeList.get(0).setRecordCount(recordCount);
                 employeeList.get(0).setCurrentPage(employee.getCurrentPage());
-                employeeList.get(0).setType(userInfo.getType());
             }
             String str1;
             ObjectMapper x = new ObjectMapper();//ObjectMapper类提供方法将list数据转为json数据
@@ -669,14 +750,13 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
     public void queryEmployeeSalaryByConditionAppli(Employee employee, HttpServletResponse response, HttpSession session) throws Exception {
         try {
             UserInfo userInfo = (UserInfo) session.getAttribute("account");
-            List<Employee> employeeList = financeServ.queryEmployeeSalaryByCondition(employee);
+            List<Salary> employeeList = financeServ.queryEmployeeSalaryByCondition(employee);
             int recordCount = financeServ.queryEmployeeSalaryByConditionCount(employee);
             int maxPage = recordCount % employee.getPageSize() == 0 ? recordCount / employee.getPageSize() : recordCount / employee.getPageSize() + 1;
             if (employeeList.size() > 0) {
                 employeeList.get(0).setMaxPage(maxPage);
                 employeeList.get(0).setRecordCount(recordCount);
                 employeeList.get(0).setCurrentPage(employee.getCurrentPage());
-                employeeList.get(0).setType(userInfo.getType());
             }
             String str1;
             ObjectMapper x = new ObjectMapper();//ObjectMapper类提供方法将list数据转为json数据
@@ -698,8 +778,9 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
         UserInfo userInfo = (UserInfo) session.getAttribute("account");
         Employee employee = new Employee();
         List<Dept> deptList = financeServ.findAllDeptAll();
+        List<Dept> deptList2 = financeServ.findAllDeptAll2();
         List<Employee> empList = financeServ.findAllEmployeeAll();
-        List<Employee> employeeList = financeServ.findAllEmployeeFinance(employee);
+        List<Salary> employeeList = financeServ.findAllEmployeeFinanceA(employee);
         int recordCount = financeServ.findAllEmployeeCount();
         int maxPage = recordCount % employee.getPageSize() == 0 ? recordCount / employee.getPageSize() : recordCount / employee.getPageSize() + 1;
         employee.setMaxPage(maxPage);
@@ -708,6 +789,7 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
         view.addObject("empList", empList);
         view.addObject("employee", employee);
         view.addObject("deptList", deptList);
+        view.addObject("deptList2", deptList2);
         view.addObject("userInfo", userInfo);
         return view;
     }
@@ -719,6 +801,7 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
         UserInfo userInfo = (UserInfo) session.getAttribute("account");
         Employee employee = new Employee();
         List<Dept> deptList = financeServ.findAllDeptAll();
+        List<Dept> deptList2 = financeServ.findAllDeptAll2();
         List<Employee> empList = financeServ.findAllEmployeeAll();
         List<FinanceImportData> financeImportDataList = financeServ.findAllFinanceImportData(employee);
         int recordCount = financeServ.findAllFinanceImportDataCount();
@@ -729,6 +812,7 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
         view.addObject("empList", empList);
         view.addObject("employee", employee);
         view.addObject("deptList", deptList);
+        view.addObject("deptList2", deptList2);
         view.addObject("userInfo", userInfo);
         return view;
     }
@@ -741,6 +825,7 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
         UserInfo userInfo = (UserInfo) session.getAttribute("account");
         Employee employee = new Employee();
         List<Dept> deptList = financeServ.findAllDeptAll();
+        List<Dept> deptList2 = financeServ.findAllDeptAll2();
         List<Employee> empList = financeServ.findAllEmployeeAll();
         List<SalaryDataOutPut> salaryDataOutPutList = financeServ.findAllSalaryDataOutPut(employee);
         int recordCount = financeServ.findAllSalaryDataOutPutCount();
@@ -750,6 +835,7 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
         view.addObject("salaryDataOutPutList", salaryDataOutPutList);
         view.addObject("empList", empList);
         view.addObject("employee", employee);
+        view.addObject("deptList2", deptList2);
         view.addObject("deptList", deptList);
         view.addObject("userInfo", userInfo);
         return view;
@@ -763,6 +849,7 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
         UserInfo userInfo = (UserInfo) session.getAttribute("account");
         Employee employee = new Employee();
         List<Dept> deptList = financeServ.findAllDeptAll();
+        List<Dept> deptList2 = financeServ.findAllDeptAll2();
         List<Employee> empList = financeServ.findAllEmployeeAll();
         List<EmpHours> empHoursList = financeServ.findAllEmpHours(employee);
         int recordCount = financeServ.findAllEmpHoursHours();
@@ -773,6 +860,7 @@ public ModelAndView deleteFinanceImportDataByBatch(Employee employee, HttpSessio
         view.addObject("empList", empList);
         view.addObject("employee", employee);
         view.addObject("deptList", deptList);
+        view.addObject("deptList2", deptList2);
         view.addObject("userInfo", userInfo);
         return view;
     }

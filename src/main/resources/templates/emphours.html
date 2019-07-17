@@ -137,15 +137,15 @@
         var currentpage = $("#n_currentPage").val();
         window.parent.document.getElementById('coverbehidepage').style.display = "block";
         var formData = new FormData();
-        formData.append('nameIds', $("#name").val());
+        formData.append('names', $("#name").val());
         formData.append('empNo', $("#empNo").val());
-        formData.append('deptIds', $("#deptId").val());
-        formData.append('positionIds', $("#positionId").val());
+        formData.append('deptNames', $("#deptId").val());
+        formData.append('bigDeptNames', $("#bigDeptName").val());
         formData.append('startIncomDateStr', $("#startIncomDateStr").val());
         formData.append('endIncomDateStr', $("#endIncomDateStr").val());
         formData.append('sortMethod', sortMethod);
         formData.append('sortByName', sortByName);
-        formData.append('workTypes', $("#workType").val());
+        formData.append('yearMonth', $("#yearmonth").val());
         formData.append('currentPage', currentpage);
         $.ajax({
             data: formData,
@@ -299,15 +299,15 @@
         var currentpage = $("#n_currentPage").val();
         window.parent.document.getElementById('coverbehidepage').style.display = "block";
         var formData = new FormData();
-        formData.append('nameIds', $("#name").val());
+        formData.append('names', $("#name").val());
         formData.append('empNo', $("#empNo").val());
-        formData.append('deptIds', $("#deptId").val());
-        formData.append('positionIds', $("#positionId").val());
+        formData.append('deptNames', $("#deptId").val());
+        formData.append('bigDeptNames', $("#bigDeptName").val());
         formData.append('startIncomDateStr', $("#startIncomDateStr").val());
         formData.append('endIncomDateStr', $("#endIncomDateStr").val());
         formData.append('sortMethod', sortMethod);
         formData.append('sortByName', sortByName);
-        formData.append('workTypes', $("#workType").val());
+        formData.append('yearMonth', $("#yearmonth").val());
         formData.append('currentPage', 1);
         $.ajax({
             data: formData,
@@ -522,7 +522,7 @@
                                         data-live-search="true" data-actions-box="true"
                                         data-selected-text-format="count > 2">
                                     　　
-                                    <option th:each="c:${empList}" th:value="${c.id}"
+                                    <option th:each="c:${empList}" th:value="${c.name}"
                                             th:text="${c.name}"></option>
                                 </select>
                             </label>
@@ -532,37 +532,41 @@
                             <label>工号：</label>
                         </td>
                         <td>
-                            <label><input type="text" id="empNo" class="form-control" style="width:150px"></label>
+                            <label><input type="text"
+                                          onkeypress="if(event.keyCode==13) {submitQueryByConditionbutton.click();return false;}"
+                                          id="empNo" class="form-control" style="width:150px"></label>
                         </td>
                         <td style="text-align: right">
-                            <label>部门：</label>
+                            &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <label>大部门：</label>
+                        </td>
+                        <td>
+
+                            <select id="bigDeptName" multiple class="selectpicker show-tick form-control"
+                                    data-live-search="true" data-actions-box="true"
+                                    data-selected-text-format="count > 1">
+                                　　
+                                <option th:each="c:${deptList2}" th:value="${c.bigDeptName}"
+                                        th:text="${c.bigDeptName}"></option>
+                            </select>
+                        </td>
+                        <td style="text-align: right">
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label>部门:</label>
                         </td>
                         <td>
                             <select id="deptId" multiple class="selectpicker show-tick form-control"
                                     data-live-search="true" data-actions-box="true"
                                     data-selected-text-format="count > 2">
                                 　　
-                                <option th:each="c:${deptList}" th:value="${c.id}"
+                                <option th:each="c:${deptList}" th:value="${c.deptname}"
                                         th:text="${c.deptname}"></option>
                             </select>
                         </td>
-
-                        <td style="text-align: right">
-                            <label>职位：</label>
-                        </td>
-                        <td>
-                            <select id="positionId" multiple class="selectpicker show-tick form-control"
-                                    data-live-search="true" data-actions-box="true"
-                                    data-selected-text-format="count > 1">
-                                　　
-                                <option th:each="c:${positionList}" th:value="${c.id}"
-                                        th:text="${c.positionName}"></option>
-                            </select>
-                        </td>
+                        <td></td>
                     </tr>
                     <tr>
                         <td>
-                        <label>入职时间起：</label>
+                        <label>入职时间起:</label>
                         </td>
                         <td>
                         <input type="text" id="startIncomDateStr"
@@ -572,7 +576,7 @@
 
                         </td>
                         <td>
-                        <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;入职时间止：</label>
+                        <label>&nbsp;&nbsp;入职时间止:</label>
                         </td>
                         <td>
                         <input type="text" id="endIncomDateStr"
@@ -583,22 +587,20 @@
 
 
                         <td>
-                            <label>&nbsp;&nbsp;工作方式：</label>
+                            <label>&nbsp;&nbsp;年月选择:</label>
                         </td>
                         <td>
-                            <select id="workType" multiple class="selectpicker show-tick form-control"
-                                    data-live-search="true" data-actions-box="true"
-                                    data-selected-text-format="count > 2">
-                                　　
-                                <option th:value="0">车间</option>
-                                <option th:value="1">办公区</option>
-                            </select>
+                            <input type="text" id="yearmonth"
+                                   style="width:130px;height: 34px;text-align: center"
+                                   class="Wdate" onclick="WdatePicker({dateFmt:'yyyy-MM'})"/>
                         </td>
 
                         <td colspan="2" style="text-align: right">
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                             <a class="btn btn-primary"
-                               href="javascript:void(0);" onclick="queryEmployeeHoursByCondition()">查找</a>
+                               href="javascript:void(0);"
+                               id="submitQueryByConditionbutton"
+                               onclick="queryEmployeeHoursByCondition()">查找</a>
                             <!--<input type="button" value="查找" class="btn btn-primary">-->
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                             <a class="btn btn-primary"

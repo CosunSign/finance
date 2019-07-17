@@ -18,6 +18,18 @@
         window.parent.document.getElementById('content').style.display = "block";
         window.parent.document.getElementById('contentnew').style.display = "none";
         $('.selectpicker').selectpicker();
+        $("#legalHolidWorkHours").val(0);
+        $("#sellActual").val(0);
+        $("#sellThreshold").val(0);
+        $("#sellLevelSalary").val(0);
+        $("#houseSubsidy").val(0);
+        $("#hotTempOrOtherAllow").val(0);
+        $("#workYearsSalary").val(0);
+        $("#sellCommi").val(0);
+        $("#speciAddDeductCost").val(0);
+        $("#personIncomTax").val(0);
+        $("#basicWorkHours").val(0);
+
     });
 
     function addFinanceImportDataToMysql() {
@@ -32,6 +44,8 @@
         var sellCommi = $("#sellCommi").val();
         var speciAddDeductCost = $("#speciAddDeductCost").val();
         var yearMonth = $("#yearmonth").val();
+        var personIncomTax = $("#personIncomTax").val();
+        var basicWorkHours = $("#basicWorkHours").val();
 
         if (yearMonth.trim().length == 0) {
             isflag = false;
@@ -40,67 +54,81 @@
             errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;该员工的财务数据年月不能为空!";
             errormessagediv.style.color = "red";
             return;
-        }else if (legalHolidWorkHours.trim().length == 0) {
+        } else if (legalHolidWorkHours.trim().length == 0) {
             isflag = false;
             $("#errormessage").show();
             var errormessagediv = document.getElementById("errormessage");
             errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;法定节假日加班工时不能为空!";
             errormessagediv.style.color = "red";
             return;
-        }else if (sellActual.trim().length == 0) {
+        } else if (sellActual.trim().length == 0) {
             isflag = false;
             $("#errormessage").show();
             var errormessagediv = document.getElementById("errormessage");
             errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;业务实际不能为空!";
             errormessagediv.style.color = "red";
             return;
-        }else if (sellThreshold.trim().length == 0) {
+        } else if (sellThreshold.trim().length == 0) {
             isflag = false;
             $("#errormessage").show();
             var errormessagediv = document.getElementById("errormessage");
             errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;业务阈值不能为空!";
             errormessagediv.style.color = "red";
             return;
-        }else if (sellLevelSalary.trim().length == 0) {
+        } else if (sellLevelSalary.trim().length == 0) {
             isflag = false;
             $("#errormessage").show();
             var errormessagediv = document.getElementById("errormessage");
             errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;业务等级工资不能为空!";
             errormessagediv.style.color = "red";
             return;
-        }else if (houseSubsidy.trim().length == 0) {
+        } else if (houseSubsidy.trim().length == 0) {
             isflag = false;
             $("#errormessage").show();
             var errormessagediv = document.getElementById("errormessage");
             errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;房补工资不能为空!";
             errormessagediv.style.color = "red";
             return;
-        }else if (hotTempOrOtherAllow.trim().length == 0) {
+        } else if (hotTempOrOtherAllow.trim().length == 0) {
             isflag = false;
             $("#errormessage").show();
             var errormessagediv = document.getElementById("errormessage");
             errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;高温等其它补贴工资不能为空!";
             errormessagediv.style.color = "red";
             return;
-        }else if (workYearsSalary.trim().length == 0) {
+        } else if (workYearsSalary.trim().length == 0) {
             isflag = false;
             $("#errormessage").show();
             var errormessagediv = document.getElementById("errormessage");
             errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;工龄工资不能为空!";
             errormessagediv.style.color = "red";
             return;
-        }else if (sellCommi.trim().length == 0) {
+        } else if (sellCommi.trim().length == 0) {
             isflag = false;
             $("#errormessage").show();
             var errormessagediv = document.getElementById("errormessage");
             errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;业务提成不能为空!";
             errormessagediv.style.color = "red";
             return;
-        }else if (speciAddDeductCost.trim().length == 0) {
+        } else if (speciAddDeductCost.trim().length == 0) {
             isflag = false;
             $("#errormessage").show();
             var errormessagediv = document.getElementById("errormessage");
             errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;专项附加扣除不能为空!";
+            errormessagediv.style.color = "red";
+            return;
+        } else if (personIncomTax.trim().length == 0) {
+            isflag = false;
+            $("#errormessage").show();
+            var errormessagediv = document.getElementById("errormessage");
+            errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;个税不能为空!";
+            errormessagediv.style.color = "red";
+            return;
+        } else if (basicWorkHours.trim().length == 0) {
+            isflag = false;
+            $("#errormessage").show();
+            var errormessagediv = document.getElementById("errormessage");
+            errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;基本工时不能为空!";
             errormessagediv.style.color = "red";
             return;
         }
@@ -462,11 +490,12 @@
     }
 
     function checkIsExsit() {
-        var value = $("#yearmonth").val();
-        var empNo = $("#name").val();
+        var yearmonth = $("#yearmonth").val();
+        var name = $("#name").val();
+        var empNo = $("#empNo").val();
         var formData = new FormData();
-        formData.append('empNo', empNo);
-        formData.append('yearMonth', value);
+        formData.append('salaryId', name);
+        formData.append('yearMonth', yearmonth);
         $.ajax({
             data: formData,
             type: "POST",
@@ -480,6 +509,8 @@
                 if (data[0].type == 0) {
                     $("#errormessage").hide();
                     $("#empNo").val(data[0].empNo);
+                    $("#namename").val(data[0].name);
+                    $("#bigDeptName").val(data[0].bigDeptName);
                     $("#deptName").val(data[0].deptName)
                 } else {
                     $("#errormessage").show();
@@ -555,10 +586,14 @@
 </style>
 <body>
 <div>
-    <form id="addEmployee" th:action="@{/finance/addFinanceImportDataToMysql}" th:method="post" th:object="${financeImportData}"
+    <form id="addEmployee" th:action="@{/finance/addFinanceImportDataToMysql}" th:method="post"
+          th:object="${financeImportData}"
           enctype="multipart/form-data">
+        <input type="hidden" th:field="*{name}" id="namename">
+        <input type="hidden" th:field="*{bigDeptName}" id="bigDeptName">
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#employeemessage" role="tab" data-toggle="tab">财务数据-新增</a></li>
+            <li role="presentation" class="active"><a href="#employeemessage" role="tab" data-toggle="tab">财务数据-新增</a>
+            </li>
         </ul>
 
 
@@ -571,11 +606,11 @@
                             <tr>
                                 <td><label><font color="#FF0000" size="2">*</font>&nbsp;姓名：</label></td>
                                 <td>
-                                    <select id="name"  class="selectpicker show-tick form-control"
+                                    <select id="name" class="selectpicker show-tick form-control"
                                             data-live-search="true" data-actions-box="true"
-                                            data-selected-text-format="count > 2" onchange="checkIsExsit()">
+                                            onchange="checkIsExsit()" th:field="*{salaryId}">
                                         　　
-                                        <option th:each="c:${empList}" th:value="${c.empNo}"
+                                        <option th:each="c:${empList}" th:value="${c.id}"
                                                 th:text="${c.name}"></option>
                                     </select>
                                 </td>
@@ -604,7 +639,8 @@
                             <tr>
                                 <td><label><font color="#FF0000" size="2">*</font>&nbsp;法定节假日加班工时：</label></td>
                                 <td>
-                                    <input type="text" onblur="validateDouble('legalHolidWorkHours')" class="form-control"
+                                    <input type="text" onblur="validateDouble('legalHolidWorkHours')"
+                                           class="form-control"
                                            id="legalHolidWorkHours" th:field="*{legalHolidWorkHours}">
                                 </td>
                                 <td><label><font color="#FF0000" size="2">*</font>&nbsp;业务实际：</label></td>
@@ -637,7 +673,8 @@
                                 </td>
                                 <td><label><font color="#FF0000" size="2">*</font>&nbsp;高温等其它补贴：</label></td>
                                 <td>
-                                    <input type="text" class="form-control" onblur="validateDouble('hotTempOrOtherAllow')"
+                                    <input type="text" class="form-control"
+                                           onblur="validateDouble('hotTempOrOtherAllow')"
                                            id="hotTempOrOtherAllow" th:field="*{hotTempOrOtherAllow}">
                                 </td>
                             </tr>
@@ -656,19 +693,34 @@
                                 </td>
 
 
-
-
                             </tr>
                             <tr>
+                                <td><label><font color="#FF0000" size="2">*</font>&nbsp;基本工时：</label></td>
+                                <td>
+                                    <input type="text" class="form-control" onblur="validateDouble('basicWorkHours')"
+                                           id="basicWorkHours" th:field="*{basicWorkHours}"
+                                    >
+                                </td>
                                 <td><label><font color="#FF0000" size="2">*</font>&nbsp;专项附加扣除：</label></td>
                                 <td>
-                                    <input type="text" class="form-control" onblur="validateDouble('speciAddDeductCost')"
+                                    <input type="text" class="form-control"
+                                           onblur="validateDouble('speciAddDeductCost')"
                                            id="speciAddDeductCost" th:field="*{speciAddDeductCost}"
+                                    >
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td><label><font color="#FF0000" size="2">*</font>&nbsp;个税：</label></td>
+                                <td>
+                                    <input type="text" class="form-control" onblur="validateDouble('personIncomTax')"
+                                           id="personIncomTax" th:field="*{personIncomTax}"
                                     >
                                 </td>
                                 <td><label>&nbsp;备注：</label></td>
                                 <td colspan="1">
-                                    <input type="text" style="width: 100%;" class="form-control" id="remark" th:field="*{remark}">
+                                    <input type="text" style="width: 100%;" class="form-control" id="remark"
+                                           th:field="*{remark}">
                                 </td>
                             </tr>
                             <tr>
@@ -678,14 +730,18 @@
                                     </div>
                                 </td>
                             </tr>
+                            <br>
+                            <tr>
+                                <td colspan="4" style="text-align: center"><input type="button" value="返回"
+                                                                                  class="btn btn-primary"
+                                                                                  onclick="javascript:history.back(-1);">
+                                    <input type="button" value="保存" class="btn btn-primary"
+                                           onclick="addFinanceImportDataToMysql()"></td>
+                            </tr>
                         </table>
                     </div>
                     <p>
                     <p>
-                    <div id="bottomdiv">
-                        <input type="button" value="返回" class="btn btn-primary" onclick="javascript:history.back(-1);">
-                        <input type="button" value="保存" class="btn btn-primary" onclick="addFinanceImportDataToMysql()">
-                    </div>
                 </div>
 
             </div>

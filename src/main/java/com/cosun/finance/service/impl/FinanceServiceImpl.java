@@ -130,13 +130,18 @@ public class FinanceServiceImpl implements IFinanceServ {
 
     private String empHoursBigTitle; //工时表的最后一个字段
     private Integer empHoursBigTitleIndex = 0;
-    private String salaryBigTitle; //工资表的最后一个字段
+    private String salaryBigTitle; //工资addSalaryByBean表的最后一个字段
     private Integer salaryBigTitleIndex = 0;
     private String financeImportDataBigTitle;//财务提供数据最扣一个字段
     private Integer financeImportDataBigTitleIndex = 0;
 
     String errorExcel = "";
     String errorTitle = "";
+
+    public int checkEmployNoIsExsit(String empNo) throws Exception {
+        return financeMapper.checkEmployNoIsExsit(empNo);
+    }
+
 
     public List<Salary> translateExcelToBean(MultipartFile file) throws Exception {
         List<Salary> salaryList = new ArrayList<Salary>();
@@ -262,19 +267,55 @@ public class FinanceServiceImpl implements IFinanceServ {
         }
     }
 
+    public boolean equal(double a, double b) {
+        if ((a - b > -0.000001) && (a - b) < 0.000001)
+            return true;
+        else
+            return false;
+    }
+
     public void saveAllSalaryData(List<Salary> salaryList) throws Exception {
         financeMapper.deleteAllSalaryData();
         Employee employee;
+        HistorySalary hs;
         for (Salary sa : salaryList) {
-            sa.setState(0);
             financeMapper.saveSalary(sa);
+            hs = financeMapper.findHistorySalaryByCondiNewest(sa.getEmpNo());
+            if (hs != null) {
+                if (!(equal(hs.getCompreSalary(), sa.getCompreSalary())
+                        && equal(hs.getPosSalary(), sa.getPosSalary())
+                        && equal(hs.getJobSalary(), sa.getJobSalary())
+                        && equal(hs.getMeritSalary(), sa.getMeritSalary()))) {
+                    sa.setRemark("工资数据导入时工资与以前的数据发生变化而记录");
+                    sa.setUpdateTime(new Date());
+                    financeMapper.saveHistorySalaryByBean(sa);
+                }
+            } else {
+                sa.setRemark("初始记录");
+                sa.setUpdateTime(new Date());
+                financeMapper.saveHistorySalaryByBean(sa);
+            }
         }
 
     }
 
+    public Salary getEmployeeBySalaryId(Integer salaryId) throws Exception {
+        return financeMapper.getEmployeeBySalaryId(salaryId);
+    }
+
+    public Salary getEmployeeBySalaryId2(Integer salaryId) throws Exception {
+        return financeMapper.getEmployeeBySalaryId2(salaryId);
+    }
+
+
     public List<FinanceImportData> queryFinanceImportDataByCondition(Employee employee) throws Exception {
         return financeMapper.queryFinanceImportDataByCondition(employee);
     }
+
+    public int checkFIEmpNoandYearMonthIsExsit(EmpHours empHours) throws Exception {
+        return financeMapper.checkFIEmpNoandYearMonthIsExsit(empHours);
+    }
+
 
     public int queryFinanceImportDataByConditionCount(Employee employee) throws Exception {
         return financeMapper.queryFinanceImportDataByConditionCount(employee);
@@ -284,15 +325,73 @@ public class FinanceServiceImpl implements IFinanceServ {
         return financeMapper.findAllFinanceImportDataCount();
     }
 
-    public void addSalaryByBean(Employee employee) throws Exception {
-        Salary sa = financeMapper.getSalaryByEmpnoA(employee.getEmpNo());
+    public void addSalaryByBean(Salary salary) throws Exception {
+        Salary sa = financeMapper.getSalaryByEmpnoA(salary.getEmpNo(), salary.getName());
+        HistorySalary hs = financeMapper.findHistorySalaryByCondiNewest(sa.getEmpNo());
         if (sa != null) {
-            financeMapper.updateSalaryByBean(employee);
+            financeMapper.updateSalaryByBean(salary);
+            if (hs != null) {
+                if (!(equal(hs.getCompreSalary(), sa.getCompreSalary())
+                        && equal(hs.getPosSalary(), sa.getPosSalary())
+                        && equal(hs.getJobSalary(), sa.getJobSalary())
+                        && equal(hs.getMeritSalary(), sa.getMeritSalary()))) {
+                    salary.setRemark("使用工资修改时记录");
+                    sa.setUpdateTime(new Date());
+                    financeMapper.saveHistorySalaryByBean(salary);
+                }
+            } else {
+                salary.setRemark("使用工资新增时记录");
+                sa.setUpdateTime(new Date());
+                financeMapper.saveHistorySalaryByBean(salary);
+            }
         } else {
-            financeMapper.addSalaryByBean(employee);
+            financeMapper.addSalaryByBean(salary);
+            if (hs != null) {
+                if (!(equal(hs.getCompreSalary(), sa.getCompreSalary())
+                        && equal(hs.getPosSalary(), sa.getPosSalary())
+                        && equal(hs.getJobSalary(), sa.getJobSalary())
+                        && equal(hs.getMeritSalary(), sa.getMeritSalary()))) {
+                    salary.setRemark("使用工资修改时记录");
+                    sa.setUpdateTime(new Date());
+                    financeMapper.saveHistorySalaryByBean(salary);
+                }
+            } else {
+                salary.setRemark("使用工资修改时记录");
+                sa.setUpdateTime(new Date());
+                financeMapper.saveHistorySalaryByBean(salary);
+            }
 
         }
+
     }
+
+    public Salary getSalaryByEmpNo(String empNo, String name) throws Exception {
+        return financeMapper.getSalaryByEmpNo(empNo, name);
+    }
+
+    public void updateSalaryByBean(Salary sa) throws Exception {
+        financeMapper.updateSalaryByBean(sa);
+        HistorySalary hs = financeMapper.findHistorySalaryByCondiNewest(sa.getEmpNo());
+        if (hs != null) {
+            if (!(equal(hs.getCompreSalary(), sa.getCompreSalary())
+                    && equal(hs.getPosSalary(), sa.getPosSalary())
+                    && equal(hs.getJobSalary(), sa.getJobSalary())
+                    && equal(hs.getMeritSalary(), sa.getMeritSalary()))) {
+                sa.setRemark("使用工资修改时记录");
+                sa.setUpdateTime(new Date());
+                financeMapper.saveHistorySalaryByBean(sa);
+            }
+        } else {
+            sa.setRemark("使用工资修改时记录");
+            sa.setUpdateTime(new Date());
+            financeMapper.saveHistorySalaryByBean(sa);
+        }
+    }
+
+    public List<HistorySalary> getHistorySalaryRecordByNameAndEmpNo(Salary salary) throws Exception {
+        return financeMapper.getHistorySalaryRecordByNameAndEmpNo(salary);
+    }
+
 
     public void deleteEmpSalaryByBatch(Employee employee) throws Exception {
         financeMapper.deleteEmpSalaryByBatch(employee.getIds());
@@ -607,6 +706,11 @@ public class FinanceServiceImpl implements IFinanceServ {
         return financeMapper.checkFinanceImportNoandYearMonthIsExsit(empHours);
     }
 
+    public List<EmpHours> getEmpHoursByNameAndYearMonth(String name, String yearMonth) throws Exception {
+        return financeMapper.getEmpHoursByNameAndYearMonth(name, yearMonth);
+    }
+
+
     public void addFinanceImportDataByBean(FinanceImportData financeImportData) throws Exception {
         financeMapper.saveFinanceImportData(financeImportData);
     }
@@ -872,8 +976,8 @@ public class FinanceServiceImpl implements IFinanceServ {
         for (FinanceImportData fid : financeImportDataList) {
             fid.setYearMonth(yearMonth);
             financeMapper.saveFinanceImportData(fid);
-            dept = financeMapper.getDeptByNameAndBigName(fid.getDeptName(),fid.getBigDeptName());
-            if(dept==null) {
+            dept = financeMapper.getDeptByNameAndBigName(fid.getDeptName(), fid.getBigDeptName());
+            if (dept == null) {
                 dept = new Dept();
                 dept.setDeptname(fid.getDeptName());
                 dept.setBigDeptName(fid.getBigDeptName());
@@ -886,6 +990,11 @@ public class FinanceServiceImpl implements IFinanceServ {
     public List<SalaryDataOutPut> querySalaryDataOutPutByCondition(Employee employee) throws Exception {
         return financeMapper.querySalaryDataOutPutByCondition(employee);
     }
+
+    public int checkEmployNoAndNameIsExsit(String empNo, String name) throws Exception {
+        return financeMapper.checkEmployNoAndNameIsExsit(empNo, name);
+    }
+
 
     public int querySalaryDataOutPutByConditionCount(Employee employee) throws Exception {
         return financeMapper.querySalaryDataOutPutByConditionCount(employee);
@@ -913,6 +1022,7 @@ public class FinanceServiceImpl implements IFinanceServ {
     public void saveSalaryDataOutPutsList(List<SalaryDataOutPut> salaryDataOutPutList, String yearMonth) throws Exception {
         financeMapper.deleteSalaryDataOutPutByYearMonth(yearMonth);
         for (SalaryDataOutPut sdo : salaryDataOutPutList) {
+            sdo.setYearMonth(yearMonth);
             financeMapper.saveSalaryDataOutPut(sdo);
         }
     }
@@ -1030,15 +1140,24 @@ public class FinanceServiceImpl implements IFinanceServ {
         return financeMapper.findAllEmployeeFinance(employee);
     }
 
+    public List<Salary> findAllEmployeeFinanceA(Employee employee) throws Exception {
+        return financeMapper.findAllEmployeeFinanceA(employee);
+    }
+
+    public List<Dept> findAllDeptAll2() throws Exception {
+        return financeMapper.findAllDeptAll2();
+    }
+
+
     public int findAllEmployeeCount() throws Exception {
         return financeMapper.findAllEmployeeCount();
     }
 
-    public void deleteEmployeeSalaryByEmpno(String empNo) throws Exception {
-        financeMapper.deleteEmployeeSalaryByEmpno(empNo);
+    public void deleteEmployeeSalaryByEmpno(Integer id) throws Exception {
+        financeMapper.deleteEmployeeSalaryByEmpno(id);
     }
 
-    public List<Employee> queryEmployeeSalaryByCondition(Employee employee) throws Exception {
+    public List<Salary> queryEmployeeSalaryByCondition(Employee employee) throws Exception {
         return financeMapper.queryEmployeeSalaryByCondition(employee);
     }
 

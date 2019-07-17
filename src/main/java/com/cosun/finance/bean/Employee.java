@@ -42,10 +42,13 @@ public class Employee implements Serializable {
     private Integer type;
     private Integer workType;//0生产车间  1 办公区
     private Integer state;
-    private Integer isQuit;//0在职  1离职
-    private String isQuitStr;
+
+    private String yearMonth;
 
     private String remark;
+    private List<String> names;
+    private List<String> deptNames;
+    private List<String> bigDeptNames;
 
     private String educationLeUrl;
     private String sateListAndLeaCertiUrl;
@@ -113,26 +116,38 @@ public class Employee implements Serializable {
 
     private String stateStr;
 
-
-    public Integer getIsQuit() {
-        return isQuit;
+    public String getYearMonth() {
+        return yearMonth;
     }
 
-    public void setIsQuit(Integer isQuit) {
-        this.isQuit = isQuit;
+    public void setYearMonth(String yearMonth) {
+        this.yearMonth = yearMonth;
     }
 
-    public String getIsQuitStr() {
-        if(this.isQuit==0) {
-            return "在职";
-        }else if(this.isQuit==1) {
-            return "离职";
-        }
-        return isQuitStr;
+    public List<String> getDeptNames() {
+        return deptNames;
     }
 
-    public void setIsQuitStr(String isQuitStr) {
-        this.isQuitStr = isQuitStr;
+    public void setDeptNames(List<String> deptNames) {
+        this.deptNames = deptNames;
+    }
+
+    public List<String> getBigDeptNames() {
+        return bigDeptNames;
+    }
+
+    public void setBigDeptNames(List<String> bigDeptNames) {
+        this.bigDeptNames = bigDeptNames;
+    }
+
+
+
+    public List<String> getNames() {
+        return names;
+    }
+
+    public void setNames(List<String> names) {
+        this.names = names;
     }
 
     public Integer getEducationLeUrlInt() {

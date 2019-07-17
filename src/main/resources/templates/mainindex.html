@@ -162,19 +162,22 @@
 </div>
 <!--文件更新记录 下载记录DIV-->
 <div id="updateDiv" style="display: none">
-    <input type="radio" name="showtype" checked value="0" id="listshow" onclick="showUpdatediv()">更新记录
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <input type="radio" name="showtype" value="1" id="foldershow" onclick="showDowndiv()">下载记录
+    &nbsp;&nbsp;&nbsp;&nbsp;工资更新记录
     <div id="updateDivIn" style="display: block">
         <div id="updateDivTop" style="text-align: center">
             <table style="align: center" class="grid" width="100%">
                 <thead id="tablethead">
                 <tr>
-                    <td width="32px" style="text-align: center">序号</td>
-                    <td width="180px" style="text-align: center">文件名</td>
-                    <td width="50px" style="text-align: center">更新人</td>
-                    <td width="150px" style="text-align: center">更新时间</td>
-                    <td style="text-align: center">更新原因</td>
+                    <td width="50px" style="text-align: center">序号</td>
+                    <td width="60px" style="text-align: center">姓名</td>
+                    <td width="120px" style="text-align: center">工号</td>
+                    <td width="100px" style="text-align: center">时间</td>
+                    <td width="80px" style="text-align: center">综合技能</td>
+                    <td width="80px" style="text-align: center">岗位工资</td>
+                    <td width="80px" style="text-align: center">职务工资</td>
+                    <td width="80px" style="text-align: center">绩效奖金</td>
+                    <td width="80px" style="text-align: center">工资合计</td>
+                    <td width="460px" style="text-align: center">备注</td>
                 </tr>
                 </thead>
             </table>
@@ -423,9 +426,9 @@
     }
 
     #updateDiv {
-        top: 22%;
-        left: 25%;
-        width: 800px;
+        top: 20%;
+        left: 10%;
+        width: 1200px;
         height: 500px;
         padding: 8px;
         border: 8px solid #E8E9F7;
@@ -436,7 +439,7 @@
 
     #updateDivInner {
         border: 1px solid #9AC0CD;
-        width: 760px;
+        width: 1160px;
         height: 370px;
         margin-left: 5px;
         margin-right: 5px;
@@ -454,7 +457,7 @@
 
     #updateDivTop {
         border: 1px solid #9AC0CD;
-        width: 760px;
+        width: 1160px;
         height: 25px;
         margin-left: 5px;
         margin-right: 5px;
@@ -464,7 +467,7 @@
 
     #downDivTop {
         border: 1px solid #9AC0CD;
-        width: 760px;
+        width: 1160px;
         height: 25px;
         margin-left: 5px;
         margin-right: 5px;
@@ -474,7 +477,7 @@
 
     #innershowMessageDiv25 {
         border: 1px solid #9AC0CD;
-        width: 760px;
+        width: 1160px;
         height: 50px;
         margin-left: 5px;
         margin-right: 5px;

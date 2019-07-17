@@ -31,6 +31,8 @@
         var workYearsSalary = $("#workYearsSalary").val();
         var sellCommi = $("#sellCommi").val();
         var speciAddDeductCost = $("#speciAddDeductCost").val();
+        var personIncomTax = $("#personIncomTax").val();
+        var basicWorkHours = $("#basicWorkHours").val();
 
          if (legalHolidWorkHours.trim().length == 0) {
             isflag = false;
@@ -93,6 +95,20 @@
              $("#errormessage").show();
              var errormessagediv = document.getElementById("errormessage");
              errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;专项附加扣除不能为空!";
+             errormessagediv.style.color = "red";
+             return;
+         }else if (personIncomTax.trim().length == 0) {
+             isflag = false;
+             $("#errormessage").show();
+             var errormessagediv = document.getElementById("errormessage");
+             errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;个税不能为空!";
+             errormessagediv.style.color = "red";
+             return;
+         }else if (basicWorkHours.trim().length == 0) {
+             isflag = false;
+             $("#errormessage").show();
+             var errormessagediv = document.getElementById("errormessage");
+             errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;基本工时不能为空!";
              errormessagediv.style.color = "red";
              return;
          }
@@ -644,19 +660,36 @@
 
                             </tr>
 
-                            <tr>
-                                <td><label><font color="#FF0000" size="2">*</font>&nbsp;专项附加扣除：</label></td>
 
+                            <tr>
+                                <td><label><font color="#FF0000" size="2">*</font>&nbsp;基本工时：</label></td>
                                 <td>
-                                    <input type="text" class="form-control" onblur="validateDouble('speciAddDeductCost')"
+                                    <input type="text" class="form-control" onblur="validateDouble('basicWorkHours')"
+                                           id="basicWorkHours" th:field="*{basicWorkHours}"
+                                    >
+                                </td>
+                                <td><label><font color="#FF0000" size="2">*</font>&nbsp;专项附加扣除：</label></td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                           onblur="validateDouble('speciAddDeductCost')"
                                            id="speciAddDeductCost" th:field="*{speciAddDeductCost}"
                                     >
                                 </td>
+                            </tr>
+
+                            <tr>
+                                <td><label><font color="#FF0000" size="2">*</font>&nbsp;个税：</label></td>
+                                <td>
+                                    <input type="text" class="form-control" onblur="validateDouble('personIncomTax')"
+                                           id="personIncomTax" th:field="*{personIncomTax}">
+                                </td>
                                 <td><label>&nbsp;备注：</label></td>
                                 <td colspan="1">
-                                    <input type="text" style="width: 100%;" class="form-control" id="remark" th:field="*{remark}">
+                                    <input type="text" style="width: 100%;" class="form-control" id="remark"
+                                           th:field="*{remark}">
                                 </td>
                             </tr>
+
                             <tr>
                                 <td colspan="4" style="text-align: center;">
                                     <div id="errormessage" style="display: none">
@@ -664,14 +697,19 @@
                                     </div>
                                 </td>
                             </tr>
+
+                            <tr><td colspan="4" style="text-align: center">
+
+                                <input type="button" value="返回" class="btn btn-primary" onclick="javascript:history.back(-1);">
+                                <input type="button" value="更新" class="btn btn-primary" onclick="updateFinanceImportDataToMysql()">
+
+
+                            </td></tr>
                         </table>
                     </div>
                     <p>
                     <p>
-                    <div id="bottomdiv">
-                        <input type="button" value="返回" class="btn btn-primary" onclick="javascript:history.back(-1);">
-                        <input type="button" value="更新" class="btn btn-primary" onclick="updateFinanceImportDataToMysql()">
-                    </div>
+
                 </div>
 
             </div>

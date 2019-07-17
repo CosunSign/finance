@@ -1,6 +1,7 @@
 package com.cosun.finance.bean;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 
 /**
  * @author:homey Wong
@@ -70,6 +71,7 @@ public class SalaryDataOutPut implements Serializable {
     private int pageSize = 10;
     private int currentPageTotalNum;
 
+
     public String getBigDeptName() {
         return bigDeptName;
     }
@@ -79,6 +81,9 @@ public class SalaryDataOutPut implements Serializable {
     }
 
     public String getIncomDate() {
+//        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+//        if (this.incomDate != null)
+//            return formatter.format(this.incomDate).toString();
         return incomDate;
     }
 

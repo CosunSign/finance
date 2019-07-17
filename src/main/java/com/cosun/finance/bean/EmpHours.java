@@ -39,6 +39,7 @@ public class EmpHours implements Serializable {
     private String remark;
 
     private Integer type;
+    private Integer salaryId;
 
     // 分页属性
     private int currentPage = 1;// 用于接收页面传过来的当前页数
@@ -46,6 +47,14 @@ public class EmpHours implements Serializable {
     private int recordCount;// 总记录数
     private int pageSize = 10;
     private int currentPageTotalNum;
+
+    public Integer getSalaryId() {
+        return salaryId;
+    }
+
+    public void setSalaryId(Integer salaryId) {
+        this.salaryId = salaryId;
+    }
 
     public Double getSixDeductions() {
         return sixDeductions;

@@ -18,6 +18,23 @@
         window.parent.document.getElementById('content').style.display = "block";
         window.parent.document.getElementById('contentnew').style.display = "none";
         $('.selectpicker').selectpicker();
+        $("#zhengbanHours").val(0.0);
+        $("#workendHours").val(0);
+        $("#otherAllo").val(0);
+        $("#fullWorkReword").val(0);
+        $("#foodExpense").val(0);
+        $("#roomOrWaterEleExpense").val(0);
+        $("#oldAgeINsuran").val(0);
+        $("#medicalInsuran").val(0);
+        $("#unEmployeeInsur").val(0);
+        $("#accumulaFund").val(0);
+        $("#errorInWork").val(0);
+        $("#meritScore").val(0);
+        $("#usualExtHours").val(0);
+        $("#chinaPaidLeave").val(0);
+        $("#otherPaidLeave").val(0);
+        $("#leaveOfAbsense").val(0);
+        $("#sickLeave").val(0);
     });
 
     function addPersonToMysql() {
@@ -533,15 +550,16 @@
     }
 
     function checkIsExsit() {
-        var value = $("#yearmonth").val();
-        var empNo = $("#name").val();
+        var yearmonth = $("#yearmonth").val();
+        var name = $("#name").val();
+        var empNo = $("#empNo").val();
         var formData = new FormData();
-        formData.append('empNo', empNo);
-        formData.append('yearMonth', value);
+        formData.append('salaryId', name);
+        formData.append('yearMonth', yearmonth);
         $.ajax({
             data: formData,
             type: "POST",
-            url: "/finance/checkEmpNoandYearMonthIsExsit",
+            url: "/finance/checkEmpNoandNameandYearMonthIsExsit",
             async: true,
             cache: false,
             contentType: false,
@@ -552,6 +570,7 @@
                     $("#errormessage").hide();
                     $("#empNo").val(data[0].empNo);
                     $("#deptName").val(data[0].deptName)
+                    $("#namename").val(data[0].name)
                 } else {
                     $("#errormessage").show();
                     var errormessagediv = document.getElementById("errormessage");
@@ -628,6 +647,7 @@
 <div>
     <form id="addEmployee" th:action="@{/finance/addEmpHoursToMysql}" th:method="post" th:object="${empHours}"
           enctype="multipart/form-data">
+        <input type="hidden" id="namename" th:field="*{name}">
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active"><a href="#employeemessage" role="tab" data-toggle="tab">工时信息</a></li>
         </ul>
@@ -644,9 +664,9 @@
                                 <td>
                                     <select id="name"  class="selectpicker show-tick form-control"
                                             data-live-search="true" data-actions-box="true"
-                                            data-selected-text-format="count > 2" onchange="checkIsExsit()">
+                                             onchange="checkIsExsit()" th:field="*{salaryId}">
                                         　　
-                                        <option th:each="c:${empList}" th:value="${c.empNo}"
+                                        <option th:each="c:${empList}" th:value="${c.id}"
                                                 th:text="${c.name}"></option>
                                     </select>
                                 </td>
@@ -766,7 +786,7 @@
                                            onblur="validateDouble('medicalInsuran')" id="medicalInsuran">
 
                                 </td>
-                                <td><label>失业险：</label></td>
+                                <td><label><font color="#FF0000" size="2">*</font>&nbsp;失业险：</label></td>
                                 <td align="center">
                                     <input type="text" class="form-control" th:field="*{unEmployeeInsur}"
                                            onblur="validateDouble('unEmployeeInsur')" id="unEmployeeInsur">
@@ -784,7 +804,7 @@
 
                                 </td>
 
-                                <td><label>工作失误：</label></td>
+                                <td><label><font color="#FF0000" size="2">*</font>&nbsp;工作失误：</label></td>
                                 <td>
                                     <input type="text" class="form-control" th:field="*{errorInWork}"
                                            onblur="validateDouble('errorInWork')" id="errorInWork">
@@ -798,7 +818,7 @@
                                     <input type="text" class="form-control" onblur="validateDouble('meritScore')"
                                            id="meritScore" th:field="*{meritScore}">
                                 </td>
-                                <td ><label><font color="#FF0000" size="2">*</font>&nbsp;备注：</label></td>
+                                <td ><label>&nbsp;备注：</label></td>
                                 <td colspan="1">
                                     <input type="text" class="form-control" id="remark" th:field="*{remark}">
                                 </td>
@@ -822,7 +842,7 @@
                     <p>
                     <div id="bottomdiv">
                         <input type="button" value="返回" class="btn btn-primary" onclick="javascript:history.back(-1);">
-                        <input type="button" value="更新" class="btn btn-primary" onclick="addPersonToMysql()">
+                        <input type="button" value="保存" class="btn btn-primary" onclick="addPersonToMysql()">
                     </div>
                 </div>
 
