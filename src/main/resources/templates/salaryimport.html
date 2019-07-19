@@ -34,7 +34,7 @@
         if (flag == 2) {
             $("#errormessage").show();
             var errormessagediv = document.getElementById("errormessage");
-            errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;工号为"+$("#empnoerror").val()+"的某个工资数据不是数字或者为空，请更正再导入!";
+            errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;"+$("#empnoerror").val();
             errormessagediv.style.color = "red";
         }
 
@@ -47,7 +47,7 @@
         if (flag2 == 2) {
             $("#errormessage2").show();
             var errormessagediv = document.getElementById("errormessage2");
-            errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;工号为"+$("#empnoerror2").val()+"的某个工资数据不是数字或者为空，请更正再导入!";
+            errormessagediv.innerHTML = "&nbsp;&nbsp;&nbsp;"+$("#empnoerror2").val();
             errormessagediv.style.color = "red";
         }
 
